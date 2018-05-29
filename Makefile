@@ -13,6 +13,7 @@ clean:
 	find . -type f -name \*.pyc -delete
 	find . -type f -name \*.pyo -delete
 	find . -type d -name __pycache__ -delete
+	rm -rf .ipynb_checkpoints/
 
 tags:
 	ctags -R --fields=+l --extra=+f --languages=python --python-kinds=-iv -f ./tags $(MODULE_PATHS)
