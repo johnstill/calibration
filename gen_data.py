@@ -14,7 +14,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 
 
-def get_mnist(digit=None):
+def get_mnist(predicate=None, shuffle=True):
     """Load, split, and shuffle the data.
 
     Returns:
@@ -24,11 +24,15 @@ def get_mnist(digit=None):
     X, y = mnist['data'], mnist['target']
     X_train, X_test = X[:60_000], X[60_000:]
     y_train, y_test = y[:60_000], y[60_000:]
-    np.random.seed(42)
-    # Some models need shuffling
-    indices = np.random.permutation(60_000)
-    X_train = X_train[indices]
-    y_train = y_train[indices]
+    if predicate is not None:
+        y_train = predicate(y_train)
+        y_test = predicate(y_test)
+    if shuffle:
+        # Some models need shuffling
+        np.random.seed(42)
+        indices = np.random.permutation(60_000)
+        X_train = X_train[indices]
+        y_train = y_train[indices]
     return X_train, X_test, y_train, y_test
 
 
@@ -43,12 +47,12 @@ def predict_proba(clf, X_test):
 
 
 if __name__ == '__main__':
-    X_train, X_test, y_train, y_test = get_mnist()
-
     # We create an even detector so that we have a binary classifier to work
     # with that has a decent number of true actuals vs the total
-    y_train = (y_train % 2 == 0)
-    y_test = (y_test % 2 == 0)
+    def evens(vec):
+        return vec % 2 == 0
+
+    X_train, X_test, y_train, y_test = get_mnist(predicate=evens)
 
     # note: this last one (KNeighborsClassifier) takes a while
     classifiers = (LogisticRegression(C=1., solver='lbfgs'),
